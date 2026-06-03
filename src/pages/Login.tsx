@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../firebase";
-import bcrypt from 'bcryptjs';
 
 export default function Login() {
   const { user, isAdmin, login, loading } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
   
   // Email state
   const [email, setEmail] = useState("");
@@ -38,9 +38,25 @@ export default function Login() {
     }
   };
 
-  const hashPassword = async (pwd: string) => {
-    const salt = '$2a$10$w1D6OEv3WjG18A/sP.1eLO';
-    return bcrypt.hashSync(pwd, salt);
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setError("Bitte gib zuerst deine E-Mail-Adresse ein, um das Passwort zurückzusetzen.");
+      return;
+    }
+    try {
+      setError(null);
+      setResetMessage(null);
+      await sendPasswordResetEmail(auth, email);
+      setResetMessage("Eine E-Mail zum Zurücksetzen des Passworts wurde gesendet (bitte prüfe auch den Spam-Ordner).");
+    } catch (err: any) {
+      if (err.code === 'auth/invalid-email') {
+        setError("Die angegebene E-Mail-Adresse ist ungültig.");
+      } else if (err.code === 'auth/user-not-found') {
+        setError("Für diese E-Mail-Adresse existiert kein Konto.");
+      } else {
+        setError("Fehler beim Zurücksetzen: " + err.message);
+      }
+    }
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -49,12 +65,12 @@ export default function Login() {
     
     try {
       setError(null);
-      const hashedPassword = await hashPassword(password);
+      setResetMessage(null);
       
       if (isRegistering) {
-        await createUserWithEmailAndPassword(auth, email, hashedPassword);
+        await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        await signInWithEmailAndPassword(auth, email, hashedPassword);
+        await signInWithEmailAndPassword(auth, email, password);
       }
     } catch (err: any) {
       if (err.code === 'auth/email-already-in-use') {
@@ -86,6 +102,12 @@ export default function Login() {
             {error}
           </div>
         )}
+
+        {resetMessage && (
+          <div className="bg-green-50 text-green-700 p-4 rounded-xl mb-6 text-sm text-left">
+            {resetMessage}
+          </div>
+        )}
         
         <form onSubmit={handleEmailAuth} className="flex flex-col gap-3 mb-6">
           <input
@@ -110,6 +132,17 @@ export default function Login() {
           >
             {isRegistering ? "Registrieren" : "Anmelden"}
           </button>
+          
+          {!isRegistering && (
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              className="text-sm text-brand hover:text-brand-hover text-right mt-1 w-fit self-end"
+            >
+              Passwort vergessen?
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => setIsRegistering(!isRegistering)}
