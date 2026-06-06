@@ -107,7 +107,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-stone-600 max-w-2xl mx-auto mb-10"
           >
-            Kleiner Tierschutzverein in Berlin mit großem Herzen. Wir kümmern uns professionell um Notfälle und Schützlinge, damit sie ihr Für-Immer-Zuhause finden.
+            Seriöse Katzenvermittlung & Tierschutz e.V. in Berlin mit großem Herzen. Wir kümmern uns professionell um Straßenkatzen, Fundkatzen und Notfälle aus dem Auslandstierschutz in Berlin und Umgebung. Finden und adoptieren Sie bei uns Ihr neues Familienmitglied!
           </motion.p>
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
@@ -116,7 +116,7 @@ export default function Home() {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Link to="/tiere" className="bg-stone-900 text-white px-8 py-4 rounded-full font-medium hover:bg-stone-800 transition-colors shadow-lg">
-              Unsere Tiere kennenlernen
+              Katze oder Kätzchen finden
             </Link>
             <Link to="/spenden" className="bg-white text-stone-900 border-2 border-stone-200 px-8 py-4 rounded-full font-medium hover:border-brand hover:text-brand transition-colors flex items-center justify-center gap-2">
               <Heart className="w-5 h-5 text-brand" /> Projekt unterstützen

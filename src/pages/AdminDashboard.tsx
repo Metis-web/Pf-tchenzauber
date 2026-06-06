@@ -514,6 +514,7 @@ export default function AdminDashboard() {
                           <option>Sucht Zuhause</option>
                           <option>Reserviert</option>
                           <option>Vermittelt</option>
+                          <option>Vermittlungshilfe</option>
                           <option>Notfall</option>
                       </select>
                   </div>

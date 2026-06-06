@@ -4,6 +4,46 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
 
+const TeamMemberCard = ({ member, idx }: { member: any, idx: number }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const needsExpansion = member.description && member.description.length > 150;
+
+  return (
+    <motion.div
+      key={member.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.1 }}
+      className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow flex flex-col"
+    >
+      {member.imageUrl ? (
+        <div className="h-64 sm:h-72 w-full relative">
+          <img src={member.imageUrl} className="w-full h-full object-cover" alt={member.name} />
+        </div>
+      ) : (
+        <div className="h-64 sm:h-72 w-full bg-stone-100 flex items-center justify-center">
+          <Users className="w-16 h-16 text-stone-300" />
+        </div>
+      )}
+      <div className="p-6 md:p-8 flex flex-col flex-1">
+        <h3 className="font-display text-2xl font-bold text-stone-900 mb-1">{member.name}</h3>
+        <p className="text-brand font-bold uppercase tracking-wider text-sm mb-4">{member.role}</p>
+        <div className={`text-stone-600 leading-relaxed ${!isExpanded ? 'line-clamp-4' : ''}`}>
+          {member.description}
+        </div>
+        {needsExpansion && (
+          <button 
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-brand hover:text-brand-hover font-medium text-sm mt-3 self-start"
+          >
+            {isExpanded ? "Weniger lesen" : "Mehr lesen"}
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
 export default function Team() {
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,28 +87,7 @@ export default function Team() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {members.map((member, idx) => (
-              <motion.div
-                key={member.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
-              >
-                {member.imageUrl ? (
-                  <div className="h-64 sm:h-72 w-full relative">
-                    <img src={member.imageUrl} className="w-full h-full object-cover" alt={member.name} />
-                  </div>
-                ) : (
-                  <div className="h-64 sm:h-72 w-full bg-stone-100 flex items-center justify-center">
-                    <Users className="w-16 h-16 text-stone-300" />
-                  </div>
-                )}
-                <div className="p-6 md:p-8">
-                  <h3 className="font-display text-2xl font-bold text-stone-900 mb-1">{member.name}</h3>
-                  <p className="text-brand font-bold uppercase tracking-wider text-sm mb-4">{member.role}</p>
-                  <p className="text-stone-600 leading-relaxed">{member.description}</p>
-                </div>
-              </motion.div>
+              <TeamMemberCard key={member.id} member={member} idx={idx} />
             ))}
           </div>
         )}
