@@ -1,0 +1,112 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Primitive helpers
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    // User can be verified by Google/Facebook, or email/password. 
+    // Sometimes email_verified is false for new email/pass, so let's just check if they are signed in.
+    // If they strictly want email_verified == true, it might block non-verified users from submitting. 
+    function isSignedInLax() { return request.auth != null; }
+    
+    // Check if the current user's UID exists in the /admins collection
+    function isAdmin() {
+      return request.auth != null && (request.auth.uid == 'ADMIN' || request.auth.uid == '6WUCGpYVWISBcpTJZ5UrBjWhMBC3' || request.auth.uid == 'OlcgSswPiuQC8xffrs9d9gfrojp1' || (request.auth.token.email_verified == true && (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) || request.auth.token.email.lower() == 'beniboygalaxy@gmail.com' || request.auth.token.email.lower() == 'websociety.group@gmail.com' || request.auth.token.email.lower() == 'davisdaehne89@gmail.com')));
+    }
+
+    // Validation definitions
+    function isValidAnimal(data) {
+      return data.keys().hasAll(['name', 'description', 'status', 'createdAt']) &&
+        data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+        data.description is string && data.description.size() <= 5000 &&
+        data.status is string && data.status.size() <= 50 &&
+        data.createdAt is number;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['animalId', 'animalName', 'name', 'phone', 'motivation', 'createdAt']) &&
+             data.keys().size() <= 9 &&
+             data.animalId is string && data.animalId.size() > 0 && data.animalId.size() <= 128 &&
+             data.animalName is string && data.animalName.size() <= 100 &&
+             (!('userId' in data) || (data.userId is string && data.userId.size() <= 128)) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 254)) &&
+             data.phone is string && data.phone.size() <= 50 &&
+             data.motivation is string && data.motivation.size() <= 5000 &&
+             data.createdAt is number &&
+             (('status' in data) ? data.status is string && data.status.size() <= 50 : true);
+    }
+
+    function isValidReview(data) {
+      return data.keys().hasAll(['name', 'text', 'rating', 'createdAt']) &&
+             data.keys().size() <= 4 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.text is string && data.text.size() > 0 && data.text.size() <= 5000 &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.createdAt is timestamp;
+    }
+
+    match /admins/{userId} {
+      // Users can read their own admin document to check if they are an admin.
+      // Admins can read the whole list.
+      // No one can create an admin from the client directly.
+      allow read: if isAdmin() || (isSignedInLax() && request.auth.uid == userId);
+      allow write: if false; 
+    }
+
+    match /animals/{animalId} {
+      allow read: if isValidId(animalId) || true; // Allow get and list
+      allow create: if isAdmin() && isValidId(animalId) && isValidAnimal(incoming());
+      allow update: if isAdmin() && isValidId(animalId); 
+      allow delete: if isAdmin() && isValidId(animalId);
+    }
+
+    match /inquiries/{inquiryId} {
+      allow read: if isAdmin() || (isSignedInLax() && resource.data.userId == request.auth.uid);
+      allow create: if isValidId(inquiryId) && isValidInquiry(request.resource.data) && (!('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid);
+      allow update: if isAdmin() || (
+        isSignedInLax() && 
+        resource.data.userId == request.auth.uid && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.animalId == resource.data.animalId &&
+        request.resource.data.animalName == resource.data.animalName &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        isValidInquiry(request.resource.data)
+      );
+      allow delete: if isAdmin();
+    }
+    
+    match /about/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /blogs/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /teamMembers/{documentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isValidId(reviewId) && isValidReview(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+  }
+}
