@@ -3,8 +3,9 @@ import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { Users } from 'lucide-react';
+import { useSiteTexts } from '../hooks/useSiteTexts';
 
-const TeamMemberCard = ({ member, idx }: { member: any, idx: number }) => {
+const TeamMemberCard = ({ member, idx }: { member: any, idx: number, key?: any }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const needsExpansion = member.description && member.description.length > 150;
 
@@ -47,6 +48,7 @@ const TeamMemberCard = ({ member, idx }: { member: any, idx: number }) => {
 export default function Team() {
   const [members, setMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const texts = useSiteTexts();
 
   useEffect(() => {
     const q = query(collection(db, 'teamMembers'), orderBy('createdAt', 'asc'));
@@ -76,8 +78,8 @@ export default function Team() {
           <div className="inline-flex items-center justify-center p-4 bg-brand/10 rounded-full mb-6">
             <Users className="w-8 h-8 text-brand" />
           </div>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-stone-900 mb-6 tracking-tight">Unser Team</h1>
-          <p className="text-xl text-stone-600 max-w-2xl mx-auto">Wir kümmern uns mit ganz viel Herz um Notfälle und Schützlinge.</p>
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-stone-900 mb-6 tracking-tight">{texts.teamTitle || "Unser Team"}</h1>
+          <p className="text-xl text-stone-600 max-w-2xl mx-auto">{texts.teamSub || "Wir kümmern uns mit ganz viel Herz um Notfälle und Schützlinge."}</p>
         </motion.div>
 
         {members.length === 0 ? (

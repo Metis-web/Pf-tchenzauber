@@ -4,7 +4,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 export function ImageSlider({ imageUrls, alt }: { imageUrls: string[], alt: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (!imageUrls || imageUrls.length === 0) {
+  const mediaList = imageUrls;
+
+  if (!mediaList || mediaList.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100">
         Kein Bild vorhanden
@@ -12,35 +14,36 @@ export function ImageSlider({ imageUrls, alt }: { imageUrls: string[], alt: stri
     );
   }
 
-  if (imageUrls.length === 1) {
+  const renderMedia = (media: string, isThumbnail = false) => {
     return (
-       <img 
-        src={imageUrls[0]} 
+      <img 
+        key={media}
+        src={media} 
         alt={alt} 
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
     );
+  };
+
+  if (mediaList.length === 1) {
+    return renderMedia(mediaList[0]);
   }
 
   const handlePrevious = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setCurrentIndex((prev) => (prev === 0 ? imageUrls.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? mediaList.length - 1 : prev - 1));
   };
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setCurrentIndex((prev) => (prev === imageUrls.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev === mediaList.length - 1 ? 0 : prev + 1));
   };
 
   return (
     <div className="relative w-full h-full group">
-      <img 
-        src={imageUrls[currentIndex]} 
-        alt={`${alt} - Bild ${currentIndex + 1}`} 
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-      />
+      {renderMedia(mediaList[currentIndex])}
       
       <button 
         onClick={handlePrevious}
@@ -58,7 +61,7 @@ export function ImageSlider({ imageUrls, alt }: { imageUrls: string[], alt: stri
       </button>
 
       <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 pointer-events-none">
-        {imageUrls.map((_, idx) => (
+        {mediaList.map((_, idx) => (
           <div 
             key={idx} 
             className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentIndex ? 'bg-white' : 'bg-white/50'}`}

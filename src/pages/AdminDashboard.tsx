@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Animal, Inquiry, BundleAnimal } from "../types";
 import { LogOut, Trash2, Plus, Image as ImageIcon, View, MessageSquare, Edit, BookOpen, Settings } from "lucide-react";
 import { collection, deleteDoc, doc, onSnapshot, getDocs, query, orderBy, setDoc, updateDoc, where } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, storage } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import AdminBlogs from '../components/AdminBlogs';
 import AdminTeam from '../components/AdminTeam';
 import AdminSettings from '../components/AdminSettings';
+import AdminVisualEditor from '../components/AdminVisualEditor';
 
 export default function AdminDashboard() {
   const [animals, setAnimals] = useState<Animal[]>([]);
@@ -15,7 +16,7 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'animals' | 'inquiries' | 'reviews' | 'blogs' | 'team' | 'settings' | 'trash'>('animals');
+  const [activeTab, setActiveTab] = useState<'animals' | 'inquiries' | 'reviews' | 'blogs' | 'team' | 'settings' | 'visual-editor' | 'trash'>('animals');
   const navigate = useNavigate();
   const { user, isAdmin, loading: authLoading, logout } = useAuth();
 
@@ -28,6 +29,7 @@ export default function AdminDashboard() {
   const [status, setStatus] = useState("Sucht Zuhause");
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
   const [animalToDelete, setAnimalToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingAnimalId, setEditingAnimalId] = useState<string | null>(null);
@@ -199,20 +201,25 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!isAdmin) return;
     setIsSubmitting(true);
+    setUploadMessage("");
     
     try {
       let imageUrls: string[] = [];
       if (images.length > 0) {
-        for (let i = 0; i < Math.min(images.length, 5); i++) {
+        setUploadMessage("Verarbeite Bilder...");
+        const imagePromises = images.slice(0, 5).map(async (img: File) => {
           try {
-             const url = await resizeImage(images[i]);
-             imageUrls.push(url);
+             return await resizeImage(img);
           } catch (e) {
-            console.error("Failed to resize and convert image", e);
+             console.error("Failed to resize and convert image", e);
+             return null;
           }
-        }
+        });
+        const results = await Promise.all(imagePromises);
+        imageUrls = results.filter((url): url is string => url !== null);
       }
 
+      setUploadMessage("Speichere Daten...");
       const relevantBundleData = bundleData.slice(0, bundleSize);
       const combinedName = relevantBundleData.map(b => b.name).join(" & ");
       const combinedAge = bundleSize === 1 ? relevantBundleData[0].age : relevantBundleData.map(b => b.age).join(", ");
@@ -232,6 +239,8 @@ export default function AdminDashboard() {
         bundleAnimals: relevantBundleData
       };
 
+      let animalDocId = editingAnimalId;
+
       if (editingAnimalId) {
         if (imageUrls.length > 0) {
           updateData.imageUrl = imageUrls[0];
@@ -240,6 +249,7 @@ export default function AdminDashboard() {
         await updateDoc(doc(db, 'animals', editingAnimalId), updateData);
       } else {
         const newAnimalRef = doc(collection(db, 'animals'));
+        animalDocId = newAnimalRef.id;
         await setDoc(newAnimalRef, {
           ...updateData,
           imageUrl: imageUrls.length > 0 ? imageUrls[0] : null,
@@ -251,8 +261,10 @@ export default function AdminDashboard() {
       // Reset form
       handleCancelEdit();
       // Removed manual fetch since onSnapshot triggers automatically
+      setUploadMessage("");
     } catch (err) {
       console.error(err);
+      setUploadMessage("");
     } finally {
       setIsSubmitting(false);
     }
@@ -325,7 +337,7 @@ export default function AdminDashboard() {
   if (loading || authLoading) return <div className="p-8 text-center text-stone-500">Lade Dashboard...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
             <h1 className="font-display text-3xl font-bold text-stone-900 mb-2">Admin Dashboard</h1>
@@ -369,6 +381,12 @@ export default function AdminDashboard() {
           className={`py-3 px-4 font-bold border-b-2 transition-colors flex items-center gap-2 shrink-0 ${activeTab === 'team' ? 'border-brand text-brand font-black' : 'border-transparent text-stone-500 hover:text-stone-700'}`}
         >
           Team
+        </button>
+        <button 
+          onClick={() => setActiveTab('visual-editor')}
+          className={`py-3 px-4 font-bold border-b-2 transition-colors flex items-center gap-2 shrink-0 ${activeTab === 'visual-editor' ? 'border-brand text-brand font-black' : 'border-transparent text-stone-500 hover:text-stone-700'}`}
+        >
+          Website-Bearbeiten
         </button>
         <button 
           onClick={() => setActiveTab('settings')}
@@ -546,7 +564,7 @@ export default function AdminDashboard() {
                   </div>
                   <button type="submit" disabled={isSubmitting}
                           className="w-full bg-brand text-white py-3 rounded-xl font-bold hover:bg-brand-hover transition-colors disabled:opacity-50 mt-4">
-                      {isSubmitting ? "Wird gespeichert..." : (editingAnimalId ? "Änderungen speichern" : "Tier hinzufügen")}
+                      {isSubmitting ? (uploadMessage || "Wird gespeichert...") : (editingAnimalId ? "Änderungen speichern" : "Tier hinzufügen")}
                   </button>
               </form>
           </div>
@@ -570,7 +588,7 @@ export default function AdminDashboard() {
                                           <ImageIcon className="w-6 h-6" />
                                       </div>
                                   )}
-                                  <div className="min-w-0 flex-1">
+                                  <div className="min-w-0 flex-1 relative pr-4">
                                       <h3 className="font-bold text-stone-900 truncate text-base">{animal.name}</h3>
                                       <div className="flex items-center gap-2 text-stone-500 mt-1 flex-wrap">
                                           {animal.age && <span className="whitespace-nowrap">{animal.age}</span>}
@@ -773,7 +791,7 @@ export default function AdminDashboard() {
         <AdminTeam />
       ) : activeTab === 'settings' ? (
         <AdminSettings />
-      ) : (
+      ) : activeTab === 'trash' ? (
         <div className="space-y-12 max-w-4xl">
           <div>
             <h2 className="font-display text-2xl font-bold text-stone-900 mb-6 flex items-center gap-2">
@@ -873,9 +891,12 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
-
           </div>
         </div>
+      ) : null}
+
+      {activeTab === 'visual-editor' && (
+        <AdminVisualEditor />
       )}
     </div>
   );

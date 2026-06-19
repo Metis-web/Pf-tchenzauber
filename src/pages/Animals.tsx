@@ -5,9 +5,11 @@ import AnimalModal from "../components/AnimalModal";
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ImageSlider } from '../components/ImageSlider';
+import { useSiteTexts } from '../hooks/useSiteTexts';
 
 export default function Animals() {
   const [animals, setAnimals] = useState<Animal[]>([]);
+  const texts = useSiteTexts();
   const [loading, setLoading] = useState(true);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
 
@@ -57,9 +59,9 @@ export default function Animals() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">Unsere Schützlinge</h1>
+        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">{texts.animalsTitle || "Unsere Schützlinge"}</h1>
         <p className="text-stone-600 max-w-2xl mx-auto text-lg">
-          Lernen Sie unsere aktuellen Schützlinge kennen, die auf der Suche nach einem liebevollen Zuhause sind.
+          {texts.animalsSub || "Diese wundervollen Seelen warten auf ihr Für-Immer-Zuhause."}
         </p>
       </motion.div>
 
@@ -81,22 +83,12 @@ export default function Animals() {
           {animals.map(animal => (
             <motion.div variants={itemParams} key={animal.id} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-stone-100 flex flex-col group hover:shadow-md transition-shadow">
               <div className="aspect-[4/3] bg-stone-100 overflow-hidden relative">
-                {animal.imageUrls && animal.imageUrls.length > 1 ? (
+                <div className="w-full h-full cursor-pointer" onClick={() => setSelectedAnimal(animal)}>
                   <ImageSlider 
-                    imageUrls={animal.imageUrls} 
+                    imageUrls={animal.imageUrls && animal.imageUrls.length > 0 ? animal.imageUrls : (animal.imageUrl ? [animal.imageUrl] : [])} 
                     alt={animal.name} 
                   />
-                ) : animal.imageUrl || (animal.imageUrls && animal.imageUrls.length === 1) ? (
-                  <img 
-                    src={animal.imageUrls && animal.imageUrls.length === 1 ? animal.imageUrls[0] : animal.imageUrl || ''} 
-                    alt={animal.name} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-stone-400">
-                    Kein Bild vorhanden
-                  </div>
-                )}
+                </div>
                 {animal.status && (
                   <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-xs font-bold text-brand shadow-sm">
                     {animal.status}

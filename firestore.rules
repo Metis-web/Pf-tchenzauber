@@ -18,7 +18,13 @@ service cloud.firestore {
     
     // Check if the current user's UID exists in the /admins collection
     function isAdmin() {
-      return request.auth != null && (request.auth.uid == 'ADMIN' || request.auth.uid == '6WUCGpYVWISBcpTJZ5UrBjWhMBC3' || request.auth.uid == 'OlcgSswPiuQC8xffrs9d9gfrojp1' || (request.auth.token.email_verified == true && (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) || request.auth.token.email.lower() == 'beniboygalaxy@gmail.com' || request.auth.token.email.lower() == 'websociety.group@gmail.com' || request.auth.token.email.lower() == 'davisdaehne89@gmail.com')));
+      return request.auth != null && (
+        request.auth.uid == 'ADMIN' || 
+        request.auth.uid == '6WUCGpYVWISBcpTJZ5UrBjWhMBC3' || 
+        request.auth.uid == 'OlcgSswPiuQC8xffrs9d9gfrojp1' || 
+        (request.auth.token.email != null && (request.auth.token.email.lower() == 'beniboygalaxy@gmail.com' || request.auth.token.email.lower() == 'websociety.group@gmail.com' || request.auth.token.email.lower() == 'davisdaehne89@gmail.com')) || 
+        (request.auth.token.email_verified == true && exists(/databases/$(database)/documents/admins/$(request.auth.uid)))
+      );
     }
 
     // Validation definitions

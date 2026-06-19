@@ -7,8 +7,11 @@ import Reviews from '../components/Reviews';
 import BlogPreview from '../components/BlogPreview';
 import EmergencyStatus from '../components/EmergencyStatus';
 import AdoptedBadge from '../components/AdoptedBadge';
+import { useSiteTexts } from '../hooks/useSiteTexts';
 
 export default function Home() {
+  const texts = useSiteTexts();
+  
   const generatePath = (startX: number, startY: number, endX: number, endY: number, count: number, startDelay: number, curveIntensity: number = 20) => {
     return Array.from({ length: count }).map((_, i) => {
       const progress = i / (count - 1);
@@ -98,16 +101,15 @@ export default function Home() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-display text-4xl sm:text-6xl font-black text-stone-900 tracking-tight mb-8"
-          >
-            Wir zaubern <span className="text-brand">Pfötchen</span> ein<br/> neues Leben.
-          </motion.h1>
+            dangerouslySetInnerHTML={{ __html: texts.homeHeroTitle }}
+          />
           <motion.p 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-xl text-stone-600 max-w-2xl mx-auto mb-10"
           >
-            Seriöse Katzenvermittlung & Tierschutz e.V. in Berlin mit großem Herzen. Wir kümmern uns professionell um Straßenkatzen, Fundkatzen und Notfälle aus dem Auslandstierschutz in Berlin und Umgebung. Finden und adoptieren Sie bei uns Ihr neues Familienmitglied!
+            {texts.homeHeroSub}
           </motion.p>
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
@@ -143,8 +145,8 @@ export default function Home() {
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center bg-white/40 backdrop-blur-md rounded-3xl p-12 border border-white/50 shadow-xl relative"
         >
             <EmergencyStatus />
-            <h2 className="font-display text-3xl font-black mb-6 text-stone-900 mt-8 sm:mt-0">Sie haben eine Frage oder einen Notfall?</h2>
-            <p className="text-stone-600 mb-8 max-w-xl text-lg">Zögern Sie nicht, uns anzurufen. Wir sind in Berlin und Umgebung für unsere Tiere im Einsatz.</p>
+            <h2 className="font-display text-3xl font-black mb-6 text-stone-900 mt-8 sm:mt-0">{texts.homeEmergencyTitle}</h2>
+            <p className="text-stone-600 mb-8 max-w-xl text-lg">{texts.homeEmergencySub}</p>
             <a href="tel:01785305137" className="inline-flex items-center gap-3 bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-hover transition-colors shadow-lg hover:-translate-y-1 transform duration-200">
                 <Phone className="w-5 h-5" /> 0178 5305137
             </a>

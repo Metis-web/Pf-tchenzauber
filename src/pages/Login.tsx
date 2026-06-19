@@ -91,11 +91,21 @@ export default function Login() {
         <h1 className="font-display text-2xl font-bold text-stone-900 mb-2">
           {isRegistering ? "Registrieren" : "Anmelden"}
         </h1>
-        <p className="text-stone-500 text-sm mb-8">
+        <p className="text-stone-500 text-sm mb-6">
           {isRegistering 
             ? "Erstelle ein neues Konto." 
-            : "Melde dich an, um deine Anfragen zu verwalten."}
+            : "Melde dich an, um interne Bereiche zu verwalten."}
         </p>
+
+        <div className="bg-blue-50 text-blue-800 p-4 rounded-xl mb-8 text-sm text-left border border-blue-100 flex gap-3 items-start">
+          <svg className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p>
+            <strong>Hinweis:</strong> Die Registrierung und Anmeldung ist <strong>keine Pflicht</strong>. 
+            Die gesamte Website und alle wesentlichen Funktionen können auch komplett ohne Account genutzt werden.
+          </p>
+        </div>
 
         {error && (
           <div className="bg-red-50 text-red-600 p-4 rounded-xl mb-6 text-sm text-left">

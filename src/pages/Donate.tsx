@@ -1,7 +1,9 @@
 import { CreditCard, Heart } from "lucide-react";
 import { motion } from "motion/react";
+import { useSiteTexts } from "../hooks/useSiteTexts";
 
 export default function Donate() {
+  const texts = useSiteTexts();
   return (
     <div className="py-16 sm:py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <motion.div 
@@ -9,11 +11,9 @@ export default function Donate() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">Helfen Sie unseren Tieren</h1>
+        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">{texts.donateTitle || "Helfen Sie unseren Tieren"}</h1>
         <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed">
-          Als kleiner Verein finanzieren wir uns ausschließlich durch Spenden. Jeder Euro hilft uns, 
-          Tierarztkosten, Futter und die Unterbringung unserer Schützlinge zu decken.
-          Ihre Spende kommt zu 100% bei den Tieren an.
+          {texts.donateSub || "Als kleiner Verein finanzieren wir uns ausschließlich durch Spenden. Jeder Euro hilft uns, Tierarztkosten, Futter und die Unterbringung unserer Schützlinge zu decken. Ihre Spende kommt zu 100% bei den Tieren an."}
         </p>
       </motion.div>
 

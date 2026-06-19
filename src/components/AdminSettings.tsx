@@ -55,6 +55,8 @@ export default function AdminSettings() {
   const [datenschutzText, setDatenschutzText] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingTexts, setIsSavingTexts] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState<boolean>(false);
+  const [isSavingMaintenance, setIsSavingMaintenance] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'settings', 'emergency'), (docSnap) => {
@@ -73,11 +75,17 @@ export default function AdminSettings() {
         setDatenschutzText(docSnap.data().datenschutz || '');
       }
     });
+    const unsubMaintenance = onSnapshot(doc(db, 'settings', 'maintenance'), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().active !== undefined) {
+        setMaintenanceMode(docSnap.data().active);
+      }
+    });
 
     return () => {
       unsub();
       unsubStats();
       unsubDocs();
+      unsubMaintenance();
     };
   }, []);
 
@@ -101,11 +109,38 @@ export default function AdminSettings() {
     setIsSavingTexts(false);
   };
 
+  const handleToggleMaintenance = async (active: boolean) => {
+    setIsSavingMaintenance(true);
+    await setDoc(doc(db, 'settings', 'maintenance'), { active }, { merge: true });
+    setMaintenanceMode(active);
+    setIsSavingMaintenance(false);
+  };
+
   return (
     <div className="space-y-8 max-w-2xl bg-white p-6 sm:p-8 rounded-3xl border shadow-sm">
       <h2 className="font-display text-2xl font-bold text-stone-900 border-b pb-4">Einstellungen</h2>
-      
+
       <div>
+        <h3 className="font-bold text-lg mb-2">Wartungsmodus</h3>
+        <p className="text-stone-600 mb-4">Wenn der Wartungsmodus aktiv ist, wird normalen Besuchern eine Wartungsseite angezeigt. Administratoren können sich weiterhin einloggen und die Seite sehen.</p>
+        <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-stone-200 bg-stone-50">
+          <div>
+            <div className={`font-bold ${maintenanceMode ? 'text-amber-600' : 'text-stone-900'}`}>
+              {maintenanceMode ? 'Wartungsmodus ist AKTIV' : 'Wartungsmodus ist INAKTIV'}
+            </div>
+            <div className="text-sm text-stone-500">Website ist für Besucher {maintenanceMode ? 'gesperrt' : 'sichtbar'}.</div>
+          </div>
+          <button 
+            onClick={() => handleToggleMaintenance(!maintenanceMode)}
+            disabled={isSavingMaintenance}
+            className={`px-6 py-2 rounded-xl font-bold transition-colors ${maintenanceMode ? 'bg-stone-200 hover:bg-stone-300 text-stone-800' : 'bg-amber-100 hover:bg-amber-200 text-amber-800'}`}
+          >
+            {isSavingMaintenance ? 'Speichert...' : (maintenanceMode ? 'Deaktivieren' : 'Aktivieren')}
+          </button>
+        </div>
+      </div>
+
+      <div className="pt-8 border-t border-stone-200">
         <h3 className="font-bold text-lg mb-2">Notfall Anzeige</h3>
         <p className="text-stone-600 mb-4">Hier kannst du einstellen, ob der Tierschutzverein aktuell Kapazitäten für neue Notfälle hat oder ob ein Aufnahmestopp besteht.</p>
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
