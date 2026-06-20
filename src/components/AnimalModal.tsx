@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Animal } from '../types';
 import { motion } from 'motion/react';
 import { Check, Send, X, LogIn } from 'lucide-react';
-import { collection, doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +28,6 @@ export default function AnimalModal({ animal, onClose }: { animal: Animal; onClo
     let unsubscribe: (() => void) | undefined;
     if (user && animal) {
       setLoadingExisting(true);
-      import('firebase/firestore').then(({ query, collection, where, onSnapshot }) => {
         const q = query(
           collection(db, 'inquiries'), 
           where('userId', '==', user.uid),
@@ -46,7 +45,6 @@ export default function AnimalModal({ animal, onClose }: { animal: Animal; onClo
           console.error(err);
           setLoadingExisting(false);
         });
-      });
     }
     return () => {
       if (unsubscribe) {

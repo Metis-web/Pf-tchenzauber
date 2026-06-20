@@ -103,14 +103,13 @@ export default function Home() {
             className="font-display text-4xl sm:text-6xl font-black text-stone-900 tracking-tight mb-8"
             dangerouslySetInnerHTML={{ __html: texts.homeHeroTitle }}
           />
-          <motion.p 
+          <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl text-stone-600 max-w-2xl mx-auto mb-10"
-          >
-            {texts.homeHeroSub}
-          </motion.p>
+            className="text-lg sm:text-xl text-stone-600 max-w-3xl mx-auto mb-10 leading-relaxed [&_div]:mb-4 [&_p]:mb-4 last:[&_*]:mb-0 [&_br]:mb-2"
+            dangerouslySetInnerHTML={{ __html: texts.homeHeroSubV2 }}
+          />
           <motion.div 
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -145,8 +144,8 @@ export default function Home() {
           className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center bg-white/40 backdrop-blur-md rounded-3xl p-12 border border-white/50 shadow-xl relative"
         >
             <EmergencyStatus />
-            <h2 className="font-display text-3xl font-black mb-6 text-stone-900 mt-8 sm:mt-0">{texts.homeEmergencyTitle}</h2>
-            <p className="text-stone-600 mb-8 max-w-xl text-lg">{texts.homeEmergencySub}</p>
+            <div className="font-display text-3xl font-black mb-6 text-stone-900 mt-8 sm:mt-0" dangerouslySetInnerHTML={{ __html: texts.homeEmergencyTitle }}></div>
+            <div className="text-stone-600 mb-8 max-w-xl text-lg" dangerouslySetInnerHTML={{ __html: texts.homeEmergencySub }}></div>
             <a href="tel:01785305137" className="inline-flex items-center gap-3 bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-brand-hover transition-colors shadow-lg hover:-translate-y-1 transform duration-200">
                 <Phone className="w-5 h-5" /> 0178 5305137
             </a>

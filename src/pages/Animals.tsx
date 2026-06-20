@@ -59,10 +59,8 @@ export default function Animals() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">{texts.animalsTitle || "Unsere Schützlinge"}</h1>
-        <p className="text-stone-600 max-w-2xl mx-auto text-lg">
-          {texts.animalsSub || "Diese wundervollen Seelen warten auf ihr Für-Immer-Zuhause."}
-        </p>
+        <div className="font-display text-4xl font-black text-stone-900 mb-4" dangerouslySetInnerHTML={{ __html: texts.animalsTitle || "Unsere Schützlinge" }} />
+        <div className="text-stone-600 max-w-2xl mx-auto text-lg" dangerouslySetInnerHTML={{ __html: texts.animalsSub || "Diese wundervollen Seelen warten auf ihr Für-Immer-Zuhause." }}></div>
       </motion.div>
 
       {animals.length === 0 ? (

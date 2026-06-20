@@ -78,8 +78,8 @@ export default function Team() {
           <div className="inline-flex items-center justify-center p-4 bg-brand/10 rounded-full mb-6">
             <Users className="w-8 h-8 text-brand" />
           </div>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-stone-900 mb-6 tracking-tight">{texts.teamTitle || "Unser Team"}</h1>
-          <p className="text-xl text-stone-600 max-w-2xl mx-auto">{texts.teamSub || "Wir kümmern uns mit ganz viel Herz um Notfälle und Schützlinge."}</p>
+          <div className="font-display text-4xl md:text-5xl lg:text-6xl font-black text-stone-900 mb-6 tracking-tight" dangerouslySetInnerHTML={{ __html: texts.teamTitle || "Unser Team" }} />
+          <div className="text-xl text-stone-600 max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: texts.teamSub || "Wir kümmern uns mit ganz viel Herz um Notfälle und Schützlinge." }}></div>
         </motion.div>
 
         {members.length === 0 ? (

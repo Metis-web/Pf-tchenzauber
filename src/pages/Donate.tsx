@@ -11,10 +11,8 @@ export default function Donate() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <h1 className="font-display text-4xl font-black text-stone-900 mb-4">{texts.donateTitle || "Helfen Sie unseren Tieren"}</h1>
-        <p className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed">
-          {texts.donateSub || "Als kleiner Verein finanzieren wir uns ausschließlich durch Spenden. Jeder Euro hilft uns, Tierarztkosten, Futter und die Unterbringung unserer Schützlinge zu decken. Ihre Spende kommt zu 100% bei den Tieren an."}
-        </p>
+        <div className="font-display text-4xl font-black text-stone-900 mb-4" dangerouslySetInnerHTML={{ __html: texts.donateTitle || "Helfen Sie unseren Tieren" }} />
+        <div className="text-stone-600 max-w-2xl mx-auto text-lg leading-relaxed" dangerouslySetInnerHTML={{ __html: texts.donateSub || "Als kleiner Verein finanzieren wir uns ausschließlich durch Spenden. Jeder Euro hilft uns, Tierarztkosten, Futter und die Unterbringung unserer Schützlinge zu decken. Ihre Spende kommt zu 100% bei den Tieren an." }}></div>
       </motion.div>
 
       <div className="grid md:grid-cols-2 gap-8 items-start">
